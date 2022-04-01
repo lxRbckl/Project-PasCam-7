@@ -2,9 +2,11 @@
 
 
 # import <
-from os import path
-from json import load
+from random import choice
+from json import load, dump
 from discord import Intents
+from string import printable
+from os import path, listdir
 from discord.ext import commands
 
 # >
@@ -13,13 +15,8 @@ from discord.ext import commands
 # global <
 realpath = path.realpath(__file__).split('/')
 directory = '/'.join(realpath[:(len(realpath) - 1)])
+PasCam = commands.Bot(command_prefix = '', intents = Intents.all())
 token = ''
-PasCam = commands.Bot(
-
-    command_prefix = '',
-    intents = Intents.all()
-
-)
 
 # >
 
@@ -36,11 +33,28 @@ def jsonLoad(file: str):
     # >
 
 
+def jsonDump(file: str, data: dict):
+    '''  '''
+
+    # set file <
+    # set data <
+    with open(f'{directory}{file}', 'w') as fout:
+
+        dump(data, fout, indent = 3)
+
+    # >
+
+
 @PasCam.command(aliases = jsonLoad(file = '/setting.json')['alias']['show'])
 async def showCommand(ctx):
     '''  '''
 
-    pass
+    # create output <
+    # send to user <
+    out = '\n'.join(str(i)[:-4] for i in listdir(f'{directory}/{str(ctx.author)[:-5]}'))
+    await ctx.author.send(out, delete_after = 180)
+
+    # >
 
 
 @PasCam.command(aliases = jsonLoad(file = '/setting.json')['alias']['encrypt'])
@@ -82,10 +96,6 @@ async def shareCommand(ctx, file: str, user: str):
 if (__name__ == '__main__'):
 
     pass
-
-    # print(realpath)
-    # print(directory)
-    # print(path.exists(f'{directory}/setting.json'))
 
 # >
 
