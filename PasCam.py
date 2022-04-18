@@ -6,13 +6,13 @@ from random import choice
 from json import load, dump
 from discord import Intents
 from string import printable
+from discord.ext import commands
 from os import path, listdir, mkdir, remove
 
 # >
 
 
 # global <
-backup = False
 realpath = path.realpath(__file__).split('/')
 directory = '/'.join(realpath[:(len(realpath) - 1)])
 PasCam = commands.Bot(command_prefix = '', intents = Intents.all())
@@ -85,17 +85,6 @@ def decryptFunction(host: str, file: str) -> str:
     # >
 
 
-async def sendFunction(ctx, content: str):
-    '''  '''
-
-    # if (backup) <
-    # then (not backup) <
-    if (backup is True): pass
-    else: await ctx.author.send(f'`{content}`', delete_after = 60)
-
-    # >
-
-
 @PasCam.command(aliases = jsonLoad(file = 'setting.json')['alias']['encrypt'])
 async def encryptCommand(ctx, file: str, *args, encr = None):
     '''  '''
@@ -132,12 +121,13 @@ async def encryptCommand(ctx, file: str, *args, encr = None):
 
             )
 
-            await sendFunction(ctx, content = f'{file} was encrypted.')
+            await ctx.author.send(f'`{file} was encrypted.`', delete_after = 60)
+
 
         # >
 
         # then (existing file) <
-        else: await sendFunction(ctx, content = f'{file} already exists.')
+        else: await ctx.author.send(f'`{file} already exists.`', delete_after = 60)
 
         # >
 
@@ -174,24 +164,24 @@ async def decryptCommand(ctx, file: str, host = None):
         # elif (has access) <
         elif (str(ctx.author)[:-5] in decr[1]):
 
-            await sendFunction(
+            await ctx.author.send(
 
-                ctx,
-                content = decr[0].replace('::', '\n')
+                delete_after = 60,
+                content = '||`' + decr[0].replace('::', '\n') + '`||'
 
             )
 
         # >
 
         # then (no access) <
-        else: await sendFunction(ctx, f'{file} does not exist.')
+        else: await ctx.author.send(f'`{file} does not exist.`', delete_after = 60)
 
         # >
 
     # >
 
     # then (new file) <
-    else: await sendFunction(ctx, f'{file} does not exist.')
+    else: await ctx.author.send(f'`{file} does not exist.`', delete_after = 60)
 
     # >
 
@@ -219,14 +209,14 @@ async def updateCommand(ctx, file: str, *args):
         )
 
         # output <
-        await sendFunction(ctx, f'{file} was updated')
+        await ctx.author.send(f'`{file} was updated.`', delete_after = 60)
 
         # >
 
     # >
 
     # then (new file) <
-    else: await sendFunction(ctx, f'{file} does not exist.')
+    else: await ctx.author.send(f'`{file} does not exist.`', delete_after = 60)
 
     # >
 
