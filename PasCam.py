@@ -141,7 +141,7 @@ async def decryptCommand(ctx, file: str, host = None):
     # if (existing file) <
     if (f'{file}.json' in listdir(f'{directory}/{str(ctx.author)[:-5]}')):
 
-        decr = decryptFunction(
+        decr, share, other = decryptFunction(
 
             file = file,
             host = host if (host) else str(ctx.author)[:-5]
@@ -149,25 +149,25 @@ async def decryptCommand(ctx, file: str, host = None):
         ).split(';;')
 
         # if (shared file) <
-        if ('SHARE' in decr[0]):
+        if ('(+)' in decr):
 
             await decryptCommand(
 
                 ctx,
                 file = file,
-                host = decr[0].split('::')[1]
+                host = decr.split('::')[1]
 
             )
 
         # >
 
         # elif (has access) <
-        elif (str(ctx.author)[:-5] in decr[1]):
+        elif (str(ctx.author)[:-5] in share):
 
             await ctx.author.send(
 
                 delete_after = 60,
-                content = '||`' + decr[0].replace('::', '\n') + '`||'
+                content = '||`{}`||'.format(decr.replace('::', '\n'))
 
             )
 
@@ -193,18 +193,20 @@ async def updateCommand(ctx, file: str, *args):
     # if (existing file) <
     if (f'{file}.json' in listdir(f'{directory}/{str(ctx.author)[:-5]}')):
 
-        decr = decryptFunction(
+        decr, share, other = decryptFunction(
 
             file = file,
             host = str(ctx.author)[:-5]
 
         ).split(';;')
 
+        share = share if (share) else str(ctx.author)[:-5]
+
         encryptFunction(
 
             host = str(ctx.author)[:-5],
             file = file,
-            encr = '::'.join(args) + ';;' + decr[1] + ';;'
+            encr = '::'.join(args) + ';;' + share + ';;'
 
         )
 
@@ -247,17 +249,124 @@ async def deleteCommand(ctx, file: str):
 async def shareCommand(ctx, action: str, file: str, user: str):
     '''  '''
 
-    pass
+    # if ((existing user) and (existing file)) <
+    if (user in listdir(directory)):
+
+        decr, share, other = decryptFunction(
+
+            file = file,
+            host = str(ctx.author)[:-5]
+
+        ).split(';;')
+
+        # local <
+        shareA = share.split('::')
+        shareB = share.split('::')
+        notShare = '(+)' not in decr
+        checkUser = user not in shareA
+        isAdd = 'add' in action.lower()
+        isRemove = 'rem' in action.lower()
+        checkFile = (f'{file}.json' not in listdir(f'{directory}/{user}'))
+
+        # >
+
+        # if (update) <
+        # then (no action) <
+        if ((isAdd) or (isRemove)):
+
+            # if (remove action) <
+            # elif (add action) <
+            if ((isRemove) and (not checkUser) and (notShare)): shareA.remove(user)
+            elif ((isAdd) and (checkFile) and (checkUser) and (notShare)):
+
+                shareA.append(user)
+
+                encryptFunction(
+
+                    host = user,
+                    file = file,
+                    encr = f'(+)::{str(ctx.author)[:-5]}' + ';;;;'
+
+                )
+
+            # >
+
+            # if (update) <
+            # then (no update) <
+            if (shareA != shareB):
+
+                encryptFunction(
+
+                    host=str(ctx.author)[:-5],
+                    file=file,
+                    encr=';;'.join([decr, '::'.join(shareA)]) + ';;'
+
+                )
+
+            else: await ctx.author.send('`Failed to share.`', delete_after = 60)
+
+            # >
+
+        else: await ctx.author.send('`Failed to share.`', delete_after = 60)
+
+        # >
+
+    # >
+
+    # then (new file) or (unavailable user) <
+    else: await ctx.author.send('`File/User does not exist.`', delete_after = 60)
+
+    # >
 
 
 @PasCam.command(aliases = jsonLoad(file = 'setting.json')['alias']['show'])
-async def showCommand(ctx):
+async def showCommand(ctx, file = None):
     '''  '''
 
-    pass
+    # if (single file) <
+    # then (all files) <
+    if (f'{file}.json' in listdir(f'{directory}/{str(ctx.author)[:-5]}')):
+
+        decr, share, other = decryptFunction(
+
+            host = str(ctx.author)[:-5],
+            file = file
+
+        ).split(';;')
+
+        # if (not shared file) <
+        # then (shared file) <
+        if ('(+)' not in decr):
+
+            await ctx.author.send(
+
+                delete_after = 60,
+                content='\n'.join([f'`{i}`' for i in share.split('::')])
+
+            )
+
+        else: await ctx.author.send(f'`{file} is shared.`', delete_after=60)
+
+        # >
+
+    else:
+
+        # get list <
+        # if (empty) <
+        # then (not empty) <
+        show = [f'`{i[:-5]}`' for i in listdir(f'{directory}/{str(ctx.author)[:-5]}')]
+        if (len(show) == 0): await ctx.author.send('`Empty directory.`', delete_after = 60)
+        else: await ctx.author.send('\n'.join(sorted(show)), delete_after = 60)
+
+        # >
+
+    # >
 
 
 # main <
 if (__name__ == '__main__'): PasCam.run(token)
 
 # >
+
+
+# In Loving Memory of The Bunny. #
