@@ -93,8 +93,16 @@ async def encryptCommand(ctx, file: str, *args, encr = None):
     if (str(ctx.author)[:-5] not in listdir(directory)):
 
         # set directory <
-        # update <
+        # set profile <
+        # reset <
         mkdir(f'{directory}/{str(ctx.author)[:-5]}')
+        encryptFunction(
+
+            host = str(ctx.author)[:-5],
+            file = str(ctx.author)[:-5],
+            encr = str(ctx.author.id) + ';;'
+
+        )
         await encryptCommand(ctx, file, encr = args)
 
         # >
@@ -122,7 +130,6 @@ async def encryptCommand(ctx, file: str, *args, encr = None):
             )
 
             await ctx.author.send(f'`{file} was encrypted.`', delete_after = 60)
-
 
         # >
 
@@ -294,20 +301,41 @@ async def shareCommand(ctx, action: str, file: str, user: str):
             if (shareA != shareB):
 
                 action = 'added' if (shareA > shareB) else 'removed'
-                encryptFunction(
 
-                    host=str(ctx.author)[:-5],
-                    file=file,
-                    encr=';;'.join([decr, '::'.join(shareA)]) + ';;'
-
-                )
-
-                await ctx.author.send(
-
-                    delete_after = 60,
-                    content = f'`{action} was shared to {user}.`'
-
-                )
+                # # notify host <
+                # encryptFunction(
+                #
+                #     host=str(ctx.author)[:-5],
+                #     file=file,
+                #     encr=';;'.join([decr, '::'.join(shareA)]) + ';;'
+                #
+                # )
+                #
+                # await ctx.author.send(
+                #
+                #     delete_after = 7200,
+                #     content = f'`{file} was {action} to {user}.`'
+                #
+                # )
+                #
+                # # >
+                #
+                # # notify recipient <
+                # uid, other = decryptFunction(
+                #
+                #     host = user,
+                #     file = user
+                #
+                # ).split(';;')
+                #
+                # await PasCam.get_user(int(uid)).send(
+                #
+                #     delete_after = 7200,
+                #     content = f'`{user} {action} {file}.`'
+                #
+                # )
+                #
+                # # >
 
             else: await ctx.author.send('`Failed to share.`', delete_after = 60)
 
@@ -358,9 +386,14 @@ async def showCommand(ctx, file = None):
     else:
 
         # get list <
+        # filter list <
+        show = [f'`{i[:-5]}`' for i in listdir(f'{directory}/{str(ctx.author)[:-5]}')]
+        show.remove(f'`{str(ctx.author)[:-5]}`')
+
+        # >
+
         # if (empty) <
         # then (not empty) <
-        show = [f'`{i[:-5]}`' for i in listdir(f'{directory}/{str(ctx.author)[:-5]}')]
         if (len(show) == 0): await ctx.author.send('`Empty directory.`', delete_after = 60)
         else: await ctx.author.send('\n'.join(sorted(show)), delete_after = 60)
 
