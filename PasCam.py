@@ -201,7 +201,6 @@ async def updateCommand(ctx, file: str, *args):
         ).split(';;')
 
         share = share if (share) else str(ctx.author)[:-5]
-
         encryptFunction(
 
             host = str(ctx.author)[:-5],
@@ -280,7 +279,6 @@ async def shareCommand(ctx, action: str, file: str, user: str):
             elif ((isAdd) and (checkFile) and (checkUser) and (notShare)):
 
                 shareA.append(user)
-
                 encryptFunction(
 
                     host = user,
@@ -295,11 +293,19 @@ async def shareCommand(ctx, action: str, file: str, user: str):
             # then (no update) <
             if (shareA != shareB):
 
+                action = 'added' if (shareA > shareB) else 'removed'
                 encryptFunction(
 
                     host=str(ctx.author)[:-5],
                     file=file,
                     encr=';;'.join([decr, '::'.join(shareA)]) + ';;'
+
+                )
+
+                await ctx.author.send(
+
+                    delete_after = 60,
+                    content = f'`{action} was shared to {user}.`'
 
                 )
 
