@@ -113,6 +113,7 @@ async def encryptCommand(ctx, file: str, *args, encr = None):
     else:
 
         # if (new file) <
+        # then (existing file) <
         if (f'{file}.json' not in listdir(f'{directory}/{str(ctx.author)[:-5]}')):
 
             # format <
@@ -131,9 +132,6 @@ async def encryptCommand(ctx, file: str, *args, encr = None):
 
             await ctx.author.send(f'`{file} was encrypted.`', delete_after = 60)
 
-        # >
-
-        # then (existing file) <
         else: await ctx.author.send(f'`{file} already exists.`', delete_after = 60)
 
         # >
@@ -146,6 +144,7 @@ async def decryptCommand(ctx, file: str, host = None):
     '''  '''
 
     # if (existing file) <
+    # then (new file) <
     if (f'{file}.json' in listdir(f'{directory}/{str(ctx.author)[:-5]}')):
 
         decr, share, other = decryptFunction(
@@ -156,6 +155,8 @@ async def decryptCommand(ctx, file: str, host = None):
         ).split(';;')
 
         # if (shared file) <
+        # elif (has access) <
+        # then (no access) <
         if ('(+)' in decr):
 
             await decryptCommand(
@@ -166,9 +167,6 @@ async def decryptCommand(ctx, file: str, host = None):
 
             )
 
-        # >
-
-        # elif (has access) <
         elif (str(ctx.author)[:-5] in share):
 
             await ctx.author.send(
@@ -178,16 +176,10 @@ async def decryptCommand(ctx, file: str, host = None):
 
             )
 
-        # >
-
-        # then (no access) <
         else: await ctx.author.send(f'`{file} does not exist.`', delete_after = 60)
 
         # >
 
-    # >
-
-    # then (new file) <
     else: await ctx.author.send(f'`{file} does not exist.`', delete_after = 60)
 
     # >
@@ -198,6 +190,7 @@ async def updateCommand(ctx, file: str, *args):
     '''  '''
 
     # if (existing file) <
+    # then (new file) <
     if (f'{file}.json' in listdir(f'{directory}/{str(ctx.author)[:-5]}')):
 
         decr, share, other = decryptFunction(
@@ -221,9 +214,6 @@ async def updateCommand(ctx, file: str, *args):
 
         # >
 
-    # >
-
-    # then (new file) <
     else: await ctx.author.send(f'`{file} does not exist.`', delete_after = 60)
 
     # >
@@ -234,6 +224,7 @@ async def deleteCommand(ctx, file: str):
     '''  '''
 
     # if (existing file) <
+    # then (new file) <
     if (f'{file}.json' in listdir(f'{directory}/{str(ctx.author)[:-5]}')):
 
         # remove file <
@@ -243,9 +234,6 @@ async def deleteCommand(ctx, file: str):
 
         # >
 
-    # >
-
-    # then (new file) <
     else: await ctx.author.send(f'`{file} does not exist.`', delete_after = 60)
 
     # >
@@ -301,41 +289,26 @@ async def shareCommand(ctx, action: str, file: str, user: str):
             if (shareA != shareB):
 
                 action = 'added' if (shareA > shareB) else 'removed'
+                encryptFunction(
 
-                # # notify host <
-                # encryptFunction(
-                #
-                #     host=str(ctx.author)[:-5],
-                #     file=file,
-                #     encr=';;'.join([decr, '::'.join(shareA)]) + ';;'
-                #
-                # )
-                #
-                # await ctx.author.send(
-                #
-                #     delete_after = 7200,
-                #     content = f'`{file} was {action} to {user}.`'
-                #
-                # )
-                #
-                # # >
-                #
-                # # notify recipient <
-                # uid, other = decryptFunction(
-                #
-                #     host = user,
-                #     file = user
-                #
-                # ).split(';;')
-                #
-                # await PasCam.get_user(int(uid)).send(
-                #
-                #     delete_after = 7200,
-                #     content = f'`{user} {action} {file}.`'
-                #
-                # )
-                #
-                # # >
+                    host=str(ctx.author)[:-5],
+                    file=file,
+                    encr=';;'.join([decr, '::'.join(shareA)]) + ';;'
+
+                )
+                uid, other = decryptFunction(
+
+                    host = user,
+                    file = user
+
+                ).split(';;')
+
+                # notify host <
+                # notify recipient <
+                await ctx.author.send(f'`{file} was {action} to {user}.`')
+                await PasCam.get_user(int(uid)).send(f'`{user} {action} {file}.`')
+
+                # >
 
             else: await ctx.author.send('`Failed to share.`', delete_after = 60)
 
