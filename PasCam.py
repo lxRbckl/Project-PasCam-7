@@ -246,10 +246,11 @@ async def shareCommand(ctx, action: str, file: str, user: str):
     # if ((existing user) and (existing file)) <
     if (user in listdir(directory)):
 
+        auth = str(ctx.author)[:-5]
         decr, share, other = decryptFunction(
 
             file = file,
-            host = str(ctx.author)[:-5]
+            host = auth
 
         ).split(';;')
 
@@ -278,7 +279,7 @@ async def shareCommand(ctx, action: str, file: str, user: str):
 
                     host = user,
                     file = file,
-                    encr = f'(+)::{str(ctx.author)[:-5]}' + ';;;;'
+                    encr = f'(+)::{auth}' + ';;;;'
 
                 )
 
@@ -288,12 +289,12 @@ async def shareCommand(ctx, action: str, file: str, user: str):
             # then (no update) <
             if (shareA != shareB):
 
-                action = 'added' if (shareA > shareB) else 'removed'
+                a = 'added' if (shareA > shareB) else 'removed'
                 encryptFunction(
 
-                    host=str(ctx.author)[:-5],
-                    file=file,
-                    encr=';;'.join([decr, '::'.join(shareA)]) + ';;'
+                    host = auth,
+                    file = file,
+                    encr = ';;'.join([decr, '::'.join(shareA)]) + ';;'
 
                 )
                 uid, other = decryptFunction(
@@ -305,8 +306,8 @@ async def shareCommand(ctx, action: str, file: str, user: str):
 
                 # notify host <
                 # notify recipient <
-                await ctx.author.send(f'`{file} was {action} to {user}.`')
-                await PasCam.get_user(int(uid)).send(f'`{user} {action} {file}.`')
+                await ctx.author.send(f'`{file} was {a} to {user}.`')
+                await PasCam.get_user(int(uid)).send(f'`{auth} {a} {file}.`')
 
                 # >
 
