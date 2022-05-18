@@ -21,7 +21,7 @@ token = ''
 # >
 
 
-def jsonLoad(file: str):
+def jsonLoad(file: str) -> list:
     '''  '''
 
     # get file <
@@ -33,7 +33,7 @@ def jsonLoad(file: str):
     # >
 
 
-def jsonDump(file: str, data: dict):
+def jsonDump(file: str, data: dict) -> None:
     '''  '''
 
     # set file <
@@ -90,16 +90,17 @@ async def encryptCommand(ctx, file: str, *args, encr = None):
     '''  '''
 
     # if (new host) <
-    if (str(ctx.author)[:-5] not in listdir(directory)):
+    # then (existing host) <
+    if (str(ctx.author) not in listdir(directory)):
 
         # set directory <
         # set profile <
         # reset <
-        mkdir(f'{directory}/{str(ctx.author)[:-5]}')
+        mkdir(f'{directory}/{str(ctx.author)}')
         encryptFunction(
 
-            host = str(ctx.author)[:-5],
-            file = str(ctx.author)[:-5],
+            host = str(ctx.author),
+            file = str(ctx.author),
             encr = str(ctx.author.id) + ';;'
 
         )
@@ -107,26 +108,23 @@ async def encryptCommand(ctx, file: str, *args, encr = None):
 
         # >
 
-    # >
-
-    # then (existing host) <
     else:
 
         # if (new file) <
         # then (existing file) <
-        if (f'{file}.json' not in listdir(f'{directory}/{str(ctx.author)[:-5]}')):
+        if (f'{file}.json' not in listdir(f'{directory}/{str(ctx.author)}')):
 
             # format <
             encr = '::'.join(encr) if (encr) else '::'.join(args)
-            encr += ';;' + str(ctx.author)[:-5] + ';;'
+            encr += ';;' + str(ctx.author) + ';;'
 
             # >
 
             encryptFunction(
 
                 file = file,
-                host = str(ctx.author)[:-5],
-                encr = encr
+                encr = encr,
+                host = str(ctx.author)
 
             )
 
@@ -145,12 +143,12 @@ async def decryptCommand(ctx, file: str, host = None):
 
     # if (existing file) <
     # then (new file) <
-    if (f'{file}.json' in listdir(f'{directory}/{str(ctx.author)[:-5]}')):
+    if (f'{file}.json' in listdir(f'{directory}/{str(ctx.author)}')):
 
         decr, share, other = decryptFunction(
 
             file = file,
-            host = host if (host) else str(ctx.author)[:-5]
+            host = host if (host) else str(ctx.author)
 
         ).split(';;')
 
@@ -167,7 +165,7 @@ async def decryptCommand(ctx, file: str, host = None):
 
             )
 
-        elif (str(ctx.author)[:-5] in share):
+        elif (str(ctx.author) in share):
 
             await ctx.author.send(
 
@@ -191,20 +189,20 @@ async def updateCommand(ctx, file: str, *args):
 
     # if (existing file) <
     # then (new file) <
-    if (f'{file}.json' in listdir(f'{directory}/{str(ctx.author)[:-5]}')):
+    if (f'{file}.json' in listdir(f'{directory}/{str(ctx.author)}')):
 
         decr, share, other = decryptFunction(
 
             file = file,
-            host = str(ctx.author)[:-5]
+            host = str(ctx.author)
 
         ).split(';;')
 
-        share = share if (share) else str(ctx.author)[:-5]
+        share = share if (share) else str(ctx.author)
         encryptFunction(
 
-            host = str(ctx.author)[:-5],
             file = file,
+            host = str(ctx.author),
             encr = '::'.join(args) + ';;' + share + ';;'
 
         )
@@ -225,11 +223,11 @@ async def deleteCommand(ctx, file: str):
 
     # if (existing file) <
     # then (new file) <
-    if (f'{file}.json' in listdir(f'{directory}/{str(ctx.author)[:-5]}')):
+    if (f'{file}.json' in listdir(f'{directory}/{str(ctx.author)}')):
 
         # remove file <
         # output update <
-        remove(f'{directory}/{str(ctx.author)[:-5]}/{file}.json')
+        remove(f'{directory}/{str(ctx.author)}/{file}.json')
         await ctx.author.send(f'`{file} was removed.`', delete_after = 60)
 
         # >
@@ -244,9 +242,10 @@ async def shareCommand(ctx, action: str, file: str, user: str):
     '''  '''
 
     # if ((existing user) and (existing file)) <
+    # then (new file) or (unavailable user) <
     if (user in listdir(directory)):
 
-        auth = str(ctx.author)[:-5]
+        auth = str(ctx.author)
         decr, share, other = decryptFunction(
 
             file = file,
@@ -319,9 +318,6 @@ async def shareCommand(ctx, action: str, file: str, user: str):
 
         # >
 
-    # >
-
-    # then (new file) or (unavailable user) <
     else: await ctx.author.send('`File/User does not exist.`', delete_after = 60)
 
     # >
@@ -333,12 +329,12 @@ async def showCommand(ctx, file = None):
 
     # if (single file) <
     # then (all files) <
-    if (f'{file}.json' in listdir(f'{directory}/{str(ctx.author)[:-5]}')):
+    if (f'{file}.json' in listdir(f'{directory}/{str(ctx.author)}')):
 
         decr, share, other = decryptFunction(
 
-            host = str(ctx.author)[:-5],
-            file = file
+            file = file,
+            host = str(ctx.author)
 
         ).split(';;')
 
@@ -361,8 +357,8 @@ async def showCommand(ctx, file = None):
 
         # get list <
         # filter list <
-        show = [f'`{i[:-5]}`' for i in listdir(f'{directory}/{str(ctx.author)[:-5]}')]
-        show.remove(f'`{str(ctx.author)[:-5]}`')
+        show = [f'`{i[:-5]}`' for i in listdir(f'{directory}/{str(ctx.author)}')]
+        show.remove(f'`{str(ctx.author)}`')
 
         # >
 
